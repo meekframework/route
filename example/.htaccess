@@ -1,0 +1,7 @@
+# Redirect all requests to index.php
+# This is the bare minimum required by the Meek\Routing component.
+
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule . index.php [L]
