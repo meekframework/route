@@ -1,0 +1,43 @@
+{
+    "name": "nbish11/meek-routing",
+    "description": "A simple framework for routing URLs in PHP.",
+    "require-dev": {
+        "zendframework/zend-diactoros": "^1.3",
+        "phpmd/phpmd": "^2.4",
+        "squizlabs/php_codesniffer": "^2.6",
+        "scrutinizer/ocular": "^1.3",
+        "equip/dispatch": "^0.5",
+        "phpunit/phpunit": "^6.3",
+        "phpdocumentor/phpdocumentor": "^2.9"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Nathan Bishop",
+            "email": "nbish11@hotmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.0",
+        "psr/http-message": "^1.0",
+        "http-interop/http-middleware": "^0.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Meek\\Route\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Meek\\Route\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": [
+            "phpunit"
+        ],
+        "generate": [
+            "phpdoc -d ./src -t ./docs"
+        ]
+    }
+}
