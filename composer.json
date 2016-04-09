@@ -1,5 +1,5 @@
 {
-    "name": "meek/routing",
+    "name": "nbish11/meek-routing",
     "description": "A simple framework for routing URLs in PHP.",
     "require-dev": {
         "phpunit/phpunit": "^4.8"
