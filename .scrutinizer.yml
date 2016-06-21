@@ -1,32 +1,22 @@
 checks:
-  php:
-    code_rating: true
-    duplication: true
-filter:
-  paths:
-    - src/*
-build:
-  environment:
     php:
-      version: 5.6
-  tests:
-    override:
-      -
-        command: 'composer test'
-        coverage:
-          file: 'build/logs/clover.xml'
-          format: 'clover'
+        code_rating: true
+        duplication: true
+
+filter:
+    paths:
+        - src/*
+
 tools:
-    php_sim: true
-    php_mess_detector: true
-    php_pdepend: true
+    external_code_coverage:
+        runs: 2
+        timeout: 600
     php_analyzer: true
-    php_cpd: true
+    php_cs_fixer:
+        config: { level: psr2 }
+    php_pdepend: true
     php_mess_detector:
-      enabled: true
-      config:
-        ruleset: ./phpmd.xml
-    php_code_sniffer:
-        enabled: true
         config:
-          ruleset: ./phpcs.xml
+            ruleset: ./phpmd.xml
+    php_sim: true
+    sensiolabs_security_checker: true

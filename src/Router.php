@@ -1,81 +1,170 @@
 <?php
-
+/**
+ * The MIT License (MIT)
+ * Copyright (c) 2016 Nathan Bishop
+ */
 namespace Meek\Routing;
 
-use Meek\Routing\RouteCollection;
-use Meek\Routing\Route;
-use Meek\Routing\Exceptions\NotFound as NotFoundException;
-use Meek\Routing\Exceptions\MethodNotAllowed as MethodNotAllowedException;
+use Meek\Routing\Route\Collection;
+use Meek\Routing\Route\Matcher;
+use Meek\Routing\Route\Dispatcher;
+use Meek\Routing\Path\Generator;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
+ * Matches incoming requests, and routes, to the appropriate dispatcher.
  *
+ * The router class essentially acts as a proxy for the following classes:
+ *     `Meek\Routing\Route\Collection`
+ *     `Meek\Routing\Route\Matcher`
+ *     `Meek\Routing\Route\Dispatcher`
+ *     `Meek\Routing\Path\Generator`
+ *
+ * @version 0.1.0
+ * @author Nathan Bishop (nbish11)
+ * @copyright 2016 Nathan Bishop
+ * @license MIT
  */
 class Router
 {
     /**
-     * [$routes description]
-     * @var RouteCollection
+     * The route collection.
+     *
+     * @var Collection
      */
     private $routes;
 
     /**
-     * [__construct description]
-     * @param RouteCollection $routes [description]
+     * The route matcher.
+     *
+     * @var Matcher
      */
-    public function __construct(RouteCollection $routes)
-    {
+    private $matcher;
+
+    /**
+     * The rout dispatcher.
+     *
+     * @var Dispatcher
+     */
+    private $dispatcher;
+
+    /**
+     * The path generator for named routes.
+     *
+     * @var Generator
+     */
+    private $generator;
+
+    /**
+     * Constructs a new `Router` instance.
+     *
+     * @param Collection $routes     The route collection.
+     * @param Matcher    $matcher    The route matcher.
+     * @param Dispatcher $dispatcher The route dispatcher.
+     * @param Generator  $generator  The path generator for named routes.
+     */
+    public function __construct(
+        Collection $routes,
+        Matcher $matcher,
+        Dispatcher $dispatcher,
+        Generator $generator
+    ) {
         $this->routes = $routes;
+        $this->matcher = $matcher;
+        $this->dispatcher = $dispatcher;
+        $this->generator = $generator;
     }
 
     /**
-     * [dispatch description]
-     * @param  string $requestMethod [description]
-     * @param  string $requestUri    [description]
-     * @return [type]                [description]
+     * Retrieves the route collection object.
+     *
+     * @return Collection
      */
-    public function dispatch($requestMethod, $requestUri)
+    public function getRoutes()
     {
-        $matchedRoutes = [];
-        $params = [];
-        $methodMatched = false;
+        return $this->routes;
+    }
 
-        // first, lets find some routes to match against
-        foreach ($this->routes as $route) {
-            if (preg_match($route->getPattern(), $requestUri, $params)) {
-				array_shift($params); // remove full match
-                array_values($params);  // get param values
+    /**
+     * Retrieves the route matcher object.
+     *
+     * @return Matcher
+     */
+    public function getMatcher()
+    {
+        return $this->matcher;
+    }
 
-                $matchedRoutes[] = $route;
-			}
-        }
+    /**
+     * Retrieves the route dispatcher object.
+     *
+     * @return Dispatcher
+     */
+    public function getDispatcher()
+    {
+        return $this->dispatcher;
+    }
 
-        // no routes? throw exception and let user handle
-        if (empty($matchedRoutes)) {
-            throw new NotFoundException();
-        }
+    /**
+     * Retrieves the route path generator object.
+     *
+     * @return Generator
+     */
+    public function getGenerator()
+    {
+        return $this->generator;
+    }
 
-        // we have matched routes, now time to match methods
-        foreach ($matchedRoutes as $matchedRoute) {
-            $routeMethod = $matchedRoute->getMethod();
+    /**
+     * Alias for the {@see Matcher::match} method.
+     */
+    public function match(ServerRequestInterface $request)
+    {
+        return $this->getMatcher()->match($request);
+    }
 
-            if ($requestMethod === $routeMethod ||
-                $requestMethod === 'HEAD' && ($routeMethod === 'HEAD' || $routeMethod === 'GET')) {
-                $methodMatched = true;
-                $response = call_user_func_array($matchedRoute->getCallback(), $params);
+    /**
+     * Alias for the {@see Dispatcher::dispatch} method.
+     */
+    public function dispatch(ServerRequestInterface $request)
+    {
+        return $this->getDispatcher()->dispatch($request);
+    }
 
-                // A response body should not be sent when responding to a HEAD request
-                if ($requestMethod !== 'HEAD') {
-                    echo $response;
-                }
+    /**
+     * Alias for the {@see Generator::generate} method.
+     */
+    public function generate($name, array $parameters)
+    {
+        return $this->getGenerator()->generate($name, $parameters);
+    }
 
-                break;
-            }
-        }
+    /**
+     * Allows the `Router` object to act as a proxy for the route collection.
+     *
+     * @param  string $method    The method to call on the route collection.
+     * @param  array  $arguments The arguments to forward to the method to call.
+     * @return mixed While the return value can be anything, in general,
+     *               it usually returns an instance of `Meek\Routing\Route`.
+     */
+    public function __call($method, array $arguments = [])
+    {
+        return call_user_func_array([$this->routes, $method], $arguments);
+    }
 
-        if (!$methodMatched) {
-            throw new MethodNotAllowedException();
-        }
+    /**
+     * Factory method for creating empty `Router` instances with
+     * the required dependecies pre-resolved.
+     *
+     * @return static
+     */
+    public static function create()
+    {
+        $routes = new Collection();
+        $matcher = new Matcher($routes);
+        $dispatcher = new Dispatcher($matcher);
+        $generator = new Generator($routes);
 
-        return $this;
+        return new static($routes, $matcher, $dispatcher, $generator);
     }
 }
