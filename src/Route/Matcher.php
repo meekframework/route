@@ -46,7 +46,7 @@ class Matcher
 
         foreach ($this->routes as $route) {
             if (preg_match_all($route->getPattern(), $path, $matches, PREG_SET_ORDER)) {
-                array_shift($matches[0]);   // remove full match
+                array_shift($matches[0]); // remove full match
                 $filtered = array_filter($matches[0], 'is_string', ARRAY_FILTER_USE_KEY);
                 $route->addAttributes($filtered);
 
