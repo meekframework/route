@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * The MIT License (MIT)
+ * Copyright (c) 2016 Nathan Bishop
+ */
 namespace Meek\Routing;
 
 use PHPUnit\Framework\TestCase;
