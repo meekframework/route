@@ -1,30 +1,7 @@
-checks:
-    php:
-        code_rating: true
-        duplication: true
-
 filter:
-    paths:
-        - src/*
-build:
-    environment:
-        php:
-          version: 5.6.9
-    tests:
-      override:
-          -
-              command: vendor/bin/phpunit
-              coverage:
-                  file: build/logs/clover.xml
-                  format: php-clover
-
+    paths: [src/*]
 tools:
-    php_analyzer: true
-    php_cs_fixer:
-        config: { level: psr2 }
-    php_pdepend: true
-    php_mess_detector:
-        config:
-            ruleset: ./phpmd.xml
     php_sim: true
-    sensiolabs_security_checker: true
+    php_pdepend: true
+    php_analyzer: true
+    external_code_coverage: true
