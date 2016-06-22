@@ -27,7 +27,7 @@ class Matcher
     /**
      * Constructs a new route matcher.
      *
-     * @param Collection $routes A collection of routes to match against.
+     * @param null|Collection $routes A collection of routes to match against.
      */
     public function __construct(Collection $routes = null)
     {
@@ -46,7 +46,7 @@ class Matcher
 
         foreach ($this->routes as $route) {
             if (preg_match_all($route->getPattern(), $path, $matches, PREG_SET_ORDER)) {
-                $fullMatch = array_shift($matches[0]);
+                array_shift($matches[0]);   // remove full match
                 $filtered = array_filter($matches[0], 'is_string', ARRAY_FILTER_USE_KEY);
                 $route->addAttributes($filtered);
 
