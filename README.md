@@ -1,5 +1,7 @@
 # Meek-Routing Component
 
+(change badges to flat-style)
+
 [![Scrutinizer Build Status][build-image]][build-url]
 [![Scrutinizer Quality][code-quality-image]][code-quality-url]
 [![Scrutinizer Coverage][code-coverage-image]][code-coverage-url]
@@ -9,12 +11,12 @@
 
 A simple framework for routing.
 
-## Install
+## Installation
 
-with [Composer](https://getcomposer.org/):
+With [Composer](https://getcomposer.org/):
 
 ```bash
-composer require nbish11/meek-routing
+composer require meekframework/route
 ```
 
 ## Usage
@@ -34,10 +36,24 @@ use Meek\Routing\Rule\MatchMethod;
 
 // setup...
 $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
-$router = Meek\Routing\Router::create();
+$routeCollection = new Meek\Route\Collection();
+$map = Meek\Route\Mapper($collection);
 
-// adding `Route` objects manually.
-$router->add(new Meek\Routing\Route(
+$map->get('home', '/', function (ServerRequestInterface $request) {
+    return new Zend\Diactoros\Response\TextResponse('Hello, world!');
+});
+
+// using built-in rules.
+$map->delete('/users/:id', function (ServerRequestInterface $request) {
+    return sprintf('Deleting user: "%s"', $request->getAttribute('id'));
+})
+
+// custom rules
+$map->get('/admin', function () {
+    return 'Admin Section...';
+})->addRule(new Custome\Rule\Authenicate());
+
+$map->add(new Meek\Routing\Route(
     'api.users.retrieve',
     '/api/:version/users/:id',
     function (ServerRequestInterface $request) {
@@ -49,37 +65,21 @@ $router->add(new Meek\Routing\Route(
     }
 ));
 
-// using built-in rules.
-$router->delete('/users/:id', function (ServerRequestInterface $request) {
-    return sprintf('Deleting user: "%s"', $request->getAttribute('id'));
-})->addRule(new MatchMethod());
-
-// custom rules
-$router->get('/admin', function (ServerRequestInterface $request) {
-    return 'Admin Section...';
-})->addRule(function () {
-    // authentication logic goes here
+// catch all route (typehinting parameters).
+$map->map('vanity', '/:username', function ($username) {
+    return sprintf('Hello, %s!', $username);
 });
 
-// catch all route (without method matching).
-$router->map('vanity', '/:username', function (ServerRequestInterface $request) {
-    return sprintf('Hello, %s!', $request->getAttribute('username'));
-});
-
-$router->dispatch($request);
+$response = $router->dispatch($request);
 ```
 
-## Testing
-
-This project uses [PHPUnit](https://phpunit.de/) for assertions and [Zend\Diactoros](https://zendframework.github.io/zend-diactoros/) for mocking incoming requests, and such. To run unit tests simply run the following command:
-
-```bash
-composer test
-```
+## API
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Credits/Authors
 
 ## License
 

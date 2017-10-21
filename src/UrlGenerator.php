@@ -1,28 +1,20 @@
-<?php
-/**
- * The MIT License (MIT)
- * Copyright (c) 2016 Nathan Bishop
- */
-namespace Meek\Routing\Path;
+<?php declare(strict_types=1);
 
-use Meek\Routing\Route\Collection;
-use Meek\Routing\Route;
+namespace Meek\Route;
+
 use RuntimeException;
 
 /**
- * Generates a URI "path" from a named route.
+ * Generates a URL from a route's request target.
  *
- * @version 0.1.0
- * @author Nathan Bishop (nbish11)
+ * @author Nathan Bishop <nbish11@hotmail.com> (https://nathanbishop.name)
  * @copyright 2016 Nathan Bishop
- * @license MIT
+ * @license The MIT license.
  */
-class Generator
+class UrlGenerator
 {
     /**
-     * The route collection.
-     *
-     * @var Collection
+     * @var Collection The route collection.
      */
     private $routes;
 
@@ -37,13 +29,14 @@ class Generator
     }
 
     /**
-     * Generates a new URI "path" to be used in HTML markup.
+     * Generates a URL for the given route name.
      *
-     * @param  string $name    The route name.
-     * @param  array  $context Replacements for named placeholders.
-     * @return string
+     * @param string $name The route name.
+     * @param array $context Replacements for named placeholders.
+     * @throws RuntimeException [<description>]
+     * @return string [description]
      */
-    public function generate($name, array $context = [])
+    public function generate(string $name, array $context = [])
     {
         foreach ($this->routes as $route) {
             if ($route->getName() === $name) {
@@ -57,9 +50,9 @@ class Generator
     /**
      * Replaces placeholders in a template with their contextual values.
      *
-     * @param  string $template [description]
-     * @param  array  $context  [description]
-     * @return string
+     * @param string $template [description]
+     * @param array $context [description]
+     * @return string [description]
      */
     protected static function interpolate($template, array $context = [])
     {

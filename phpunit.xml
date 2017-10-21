@@ -1,26 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit backupGlobals="false"
-         backupStaticAttributes="false"
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/6.3/phpunit.xsd"
          bootstrap="vendor/autoload.php"
-         colors="true"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true"
-         processIsolation="false"
-         stopOnError="false"
-         stopOnFailure="false"
-         syntaxCheck="true"
-         verbose="true"
->
-    <testsuites>
-        <testsuite name="Meek-Routing Component">
-            <directory suffix="Test.php">./tests</directory>
-        </testsuite>
-    </testsuites>
+         forceCoversAnnotation="true"
+         mapTestClassNameToCoveredClassName="true"
+         beStrictAboutCoversAnnotation="false"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTodoAnnotatedTests="true"
+         verbose="true">
+    <testsuite name="Meek-Route Component">
+        <directory suffix="Test.php">tests</directory>
+    </testsuite>
 
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">./src</directory>
+            <directory suffix=".php">src</directory>
         </whitelist>
     </filter>
+
+    <logging>
+        <log type="coverage-html" target="./build/report" lowUpperBound="35" highLowerBound="70"/>
+        <log type="coverage-clover" target="./build/coverage.xml"/>
+        <log type="coverage-php" target="./build/coverage.serialized"/>
+        <log type="coverage-text" target="php://stdout" showUncoveredFiles="false"/>
+        <log type="junit" target="./build/logfile.xml" logIncompleteSkipped="false"/>
+        <log type="testdox-html" target="./build/testdox.html"/>
+        <log type="testdox-text" target="./build/testdox.txt"/>
+    </logging>
 </phpunit>

@@ -1,283 +1,138 @@
-<?php
-/**
- * The MIT License (MIT)
- * Copyright (c) 2016 Nathan Bishop
- */
-namespace Meek\Routing;
+<?php declare(strict_types=1);
+
+namespace Meek\Route;
 
 use InvalidArgumentException;
 
 /**
- * Models a "route" object.
+ * Models a 'route' object.
  *
- * @version 0.1.0
- * @author Nathan Bishop (nbish11)
+ * @author Nathan Bishop <nbish11@hotmail.com> (https://nathanbishop.name)
  * @copyright 2016 Nathan Bishop
- * @license MIT
+ * @license The MIT license.
  */
 class Route
 {
     /**
-     * The regex used to match placeholders in a URI path.
-     *
-     * By default uses RoR-type placeholders (E.g. ":id", ":action").
-     *
-     * @var string
-     */
-    const PLACEHOLDER_REGEX = '/:([^\/]+)/';
-
-    /**
-     * The route's name.
-     *
-     * @var string
+     * @var string The name of the route.
      */
     private $name;
 
     /**
-     * The methods this route can respond to.
-     *
-     * @var string[]
+     * @see https://tools.ietf.org/html/rfc7231#section-4
+     * @var string The request method the route should match.
      */
-    private $methods;
+    private $method;
 
     /**
-     * The URI path this route responds to.
-     *
-     * @var string
+     * @see https://tools.ietf.org/html/rfc7230#section-5.3
+     * @var string The request target the route should match.
      */
     private $path;
 
     /**
-     * The regex pattern to use for matching this route.
-     *
-     * @var string
+     * @var callable The handler to be called on route match.
      */
-    private $pattern;
+    private $handler;
 
     /**
-     * The callback to be used when the route is matched.
-     *
-     * @var callable
-     */
-    private $callback;
-
-    /**
-     * The placeholders in the URI path as well as any custom defined attributes.
-     *
-     * @var mixed[]
+     * @var string[] Additional attributes to attach to the route. Usually the parsed placeholders from the request.
      */
     private $attributes;
 
     /**
-     * Additional rules for the this route to match against (E.g "Rule\MatchMethod").
+     * Creates a new route object.
      *
-     * @var callable[]
+     * @param string $method The request method as defined in RFC7231, Section 4.
+     * @param string $path The request target as defined in RFC7230, Section 5.3.
+     * @param callable $handler The callback to be called on a successful match.
      */
-    private $rules;
-
-    /**
-     * Methods the route supports.
-     *
-     * @var array
-     */
-    protected static $allowedMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
-
-    /**
-     * Constructs a new route object.
-     *
-     * @param string   $name     The route name (each route name should be unique).
-     * @param string   $path     The URI path this route should respond to.
-     * @param callable $callback The callback to use on a successfull match.
-     */
-    public function __construct($name, $path, callable $callback)
+    public function __construct(string $method, string $path, callable $handler)
     {
-        $this->name = $name;
+        $this->method = strtoupper($method);
+
+        if ($path !== '*' && (substr($path, 0, 1) !== '/')) {
+            throw new InvalidArgumentException('Path must either be an asterix ("*") or begin with a slash("/")');
+        }
+
         $this->path = $path;
-        $this->callback = $callback;
-        $this->methods = [];
+        $this->handler = $handler;
+        $this->name = '';
         $this->attributes = [];
-        $this->rules = [];
-
-        $pattern = preg_replace_callback(
-            static::PLACEHOLDER_REGEX,
-            function ($match) {
-                $this->addAttribute($match[1]);
-                return sprintf('(?<%s>[^/]+)', $match[1]);
-            },
-            $this->path
-        );
-
-        $this->pattern = sprintf('/^%s$/', str_replace('/', '\/', $pattern));
     }
 
     /**
-     * Retrieves the route name.
+     * Retrieve the method the route responds to.
      *
-     * @return string
+     * @return string The request method.
      */
-    public function getName()
+    public function getMethod(): string
     {
-        return $this->name;
+        return $this->method;
     }
 
     /**
-     * Retrieves the URI path the route responds to.
+     * Retrieve the path the route responds to.
      *
-     * @return string
+     * @return string An empty string if there is no path.
      */
-    public function getPath()
+    public function getPath(): string
     {
         return $this->path;
     }
 
     /**
-     * The regex pattern, if using a RegexMatcher.
-     *
-     * Also adds placeholders found in the URI path to the route {@see Route::$attributes}.
-     *
-     * @return string
-     */
-    public function getPattern()
-    {
-        return $this->pattern;
-    }
-
-    /**
      * Retrieves the callback.
      *
-     * @return callable
+     * @return callable The callback for the route.
      */
-    public function getCallback()
+    public function getHandler(): callable
     {
-        return $this->callback;
+        return $this->handler;
     }
 
     /**
-     * Attaches an additional method to the route.
+     * Set the name of the route.
      *
-     * @param string $method A valid HTTP method.
-     * @return static
+     * @param string $name The name to assign the route
+     * @throws InvalidArgumentException [<description>]
      */
-    public function addMethod($method)
+    public function setName(string $name): void
     {
-        $method = strtoupper($method);
-
-        if (!in_array($method, static::$allowedMethods, true)) {
-            throw new InvalidArgumentException('A valid HTTP method was not provided.');
+        if (empty($name)) {
+            throw new InvalidArgumentException('Route name cannot be empty');
         }
 
-        // HTTP "GET" requests MUST support HTTP "HEAD" requests as well.
-        if ($method === 'GET' && !in_array($method, $this->methods)) {
-            $this->methods[] = 'HEAD';
-        }
-
-        $this->methods[] = $method;
-
-        return $this;
+        $this->name = $name;
     }
 
     /**
-     * Attaches multiple methods to the route.
+     * Retrieve the route name.
      *
-     * @see    Route::addMethod
-     * @param  string[] $methods The HTTP methods to add.
-     * @return static
+     * @return string An empty string if the route has no name.
      */
-    public function addMethods(array $methods)
+    public function getName(): string
     {
-        foreach ($methods as $method) {
-            $this->addMethod($method);
-        }
-
-        return $this;
+        return $this->name;
     }
 
     /**
-     * Retrieves methods supported by this route.
+     * Set some additional route data on the route.
      *
-     * @return string[]
+     * @param string[] $attributes Additional data to add to the route.
      */
-    public function getMethods()
+    public function setAttributes(array $attributes): void
     {
-        return $this->methods;
+        $this->attributes = $attributes;
     }
 
     /**
-     * Attaches an attribute to the route.
+     * Retrieve the route data.
      *
-     * @param  string $name  The name of the attribute.
-     * @param  mixed  $value The value of the attribute.
-     * @return static
+     * @return string[] Additional data for the route.
      */
-    public function addAttribute($name, $value = null)
-    {
-        $this->attributes[$name] = $value;
-
-        return $this;
-    }
-
-    /**
-     * Attaches multiple attributes to the route.
-     *
-     * @see    Route::addAttribute
-     * @param  mixed[] $attributes The attributes to add.
-     * @return static
-     */
-    public function addAttributes(array $attributes)
-    {
-        foreach ($attributes as $name => $value) {
-            $this->addAttribute($name, $value);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Retrieves the attributes associated with the route.
-     *
-     * @return mixed[]
-     */
-    public function getAttributes()
+    public function getAttributes(): array
     {
         return $this->attributes;
-    }
-
-    /**
-     * Attaches an additional matching rule to the route.
-     *
-     * @param  callable $rule The additional route rule.
-     * @return static
-     */
-    public function addRule(callable $rule)
-    {
-        $this->rules[] = $rule;
-
-        return $this;
-    }
-
-    /**
-     * Attaches multiple rules to the route.
-     *
-     * @see    Route::addRule
-     * @param  callable[] $rules The rules to add.
-     * @return static
-     */
-    public function addRules(array $rules)
-    {
-        foreach ($rules as $rule) {
-            $this->addRule($rule);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Retrieves the rules associated with the route.
-     *
-     * @return callable[]
-     */
-    public function getRules()
-    {
-        return $this->rules;
     }
 }

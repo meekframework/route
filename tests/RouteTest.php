@@ -1,97 +1,140 @@
-<?php
+<?php declare(strict_types=1);
 
-namespace Meek\Routing;
+namespace Meek\Route;
 
 use PHPUnit\Framework\TestCase;
-use Meek\Routing\Rule\MatchMethod;
 
 class RouteTest extends TestCase
 {
-    private $route;
-
-    public function setUp()
+    /**
+     * @covers \Meek\Route\Route::__construct
+     */
+    public function testMethodIsNormalisedToUpperCase()
     {
-        $this->route = new Route('test.route', '/', function () {});
+        $route = new Route('post', '*', function () {});
+
+        $this->assertEquals('POST', $route->getMethod());
     }
 
-    public function testCanRetrieveName()
-    {
-        $this->assertEquals('test.route', $this->route->getName());
-    }
-
-    public function testCanRetrievePath()
-    {
-        $this->assertEquals('/', $this->route->getPath());
-    }
-
-    public function testCanRetrievePatternForBasicPath()
-    {
-        $this->assertEquals('/^\/$/', $this->route->getPattern());
-    }
-
-    public function testExtractsNamedPlaceholdersFromPathAndAddsToAttributes()
-    {
-        $route = new Route('test.route', '/api/:version/users/:id', function () {});
-        $expected = ['version' => null, 'id' => null];
-        $this->assertTrue($expected == $route->getAttributes());
-    }
-
-    public function testCanRetrieveCallback()
-    {
-        $callback = function () { return 'Hello, World!'; };
-        $route = new Route('test.route', '/', $callback);
-        $this->assertSame($callback, $route->getCallback());
-    }
-
-    public function testRouteDefaultsToNoMethods()
-    {
-        $this->assertEmpty($this->route->getMethods());
-    }
-
-    public function testAddingMethodToRouteIsNormalizedToUpperCase()
-    {
-        $this->route->addMethod('get');
-        $this->assertTrue(in_array('GET', $this->route->getMethods()));
-    }
-
-    public function testAddingGETMethodToRouteAlsoAddsHEADMethod()
-    {
-        $this->route->addMethod('GET');
-        $this->assertTrue(in_array('HEAD', $this->route->getMethods()));
-    }
-
-    public function testErrorIsThrownWhenTryingToAddAnUnallowedMethod()
+    /**
+     * @covers \Meek\Route\Route::__construct
+     */
+    public function testThrowsExceptionIfPathDoesNotStartWithSlash()
     {
         $this->expectException('InvalidArgumentException');
-        $this->route->addMethod('CONNECT');
+        $this->expectExceptionMessage('Path must either be an asterix ("*") or begin with a slash("/")');
+
+        $route = new Route('get', 'posts', function () {});
     }
 
-    public function testRouteDefaultsToNoAttributes()
+    /**
+     * @covers \Meek\Route\Route::__construct
+     */
+    public function testDoesNotThrowExceptionIfPathIsAnAsterix()
     {
-        $this->assertEmpty($this->route->getAttributes());
+        $route = new Route('get', '*', function () {});
+
+        $this->assertEquals('*', $route->getPath());
     }
 
-    public function testCanAddAttributeWithoutValue()
+    /**
+     * @covers \Meek\Route\Route::__construct
+     */
+    public function testRouteIsInitialisedWithNoAttributes()
     {
-        $this->route->addAttribute('test');
-        $this->assertSame(null, $this->route->getAttributes()['test']);
+        $route = new Route('get', '/', function () {});
+
+        $this->assertEmpty($route->getAttributes());
     }
 
-    public function testCanOnlyAddCallableRules()
+    /**
+     * @covers \Meek\Route\Route::getMethod
+     */
+    public function testCanGetMethod()
     {
-        $this->expectException('PHPUnit_Framework_Error');
-        $this->route->addRule('Boo!');
+        $route = new Route('get', '*', function () {});
+
+        $this->assertEquals('GET', $route->getMethod());
     }
 
-    public function testCanAddRule()
+    /**
+     * @covers \Meek\Route\Route::getPath
+     */
+    public function testCanGetPath()
     {
-        $rule = new MatchMethod();
-        $this->route->addRule($rule);
-        $this->assertSame($rule, $this->route->getRules()[0]);
+        $route = new Route('get', '/posts', function () {});
+
+        $this->assertEquals('/posts', $route->getPath());
     }
 
-    public function testRouteDefaultsToNoRules()
+    /**
+     * @covers \Meek\Route\Route::getHandler
+     */
+    public function testCanGetHandler()
     {
-        $this->assertEmpty($this->route->getRules());
+        $handler = function () {};
+        $route = new Route('get', '*', $handler);
+
+        $this->assertSame($handler, $route->getHandler());
+    }
+
+    /**
+     * @covers \Meek\Route\Route::setName
+     */
+    public function testCanNameRoute()
+    {
+        $route = new Route('get', '/', function () {});
+        $route->setName('test.route');
+
+        $this->assertEquals('test.route', $route->getName());
+    }
+
+    /**
+     * @covers \Meek\Route\Route::setName
+     */
+    public function testThrowsExceptionIfNameIsEmpty()
+    {
+        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionMessage('Route name cannot be empty');
+
+        $route = new Route('get', '/', function () {});
+        $route->setName('');
+    }
+
+    /**
+     * @covers \Meek\Route\Route::getName
+     */
+    public function testCanGetRouteName()
+    {
+        $route = new Route('get', '/', function () {});
+        $route->setName('test.route');
+
+        $this->assertEquals('test.route', $route->getName());
+    }
+
+    /**
+     * @covers \Meek\Route\Route::setAttributes
+     */
+    public function testCanSetAttributes()
+    {
+        $parsedPlaceholders = ['version' => 'v3', 'id' => '465'];
+        $route = new Route('get', '/', function () {});
+
+        $route->setAttributes($parsedPlaceholders);
+
+        $this->assertEquals($parsedPlaceholders, $route->getAttributes());
+    }
+
+    /**
+     * @covers \Meek\Route\Route::getAttributes
+     */
+    public function testCanGetAttributes()
+    {
+        $parsedPlaceholders = ['version' => 'v3', 'id' => '465'];
+        $route = new Route('get', '/', function () {});
+
+        $route->setAttributes($parsedPlaceholders);
+
+        $this->assertEquals($parsedPlaceholders, $route->getAttributes());
     }
 }
