@@ -1,7 +1,5 @@
 # Meek-Routing Component
 
-(change badges to flat-style)
-
 [![Scrutinizer Build Status][build-image]][build-url]
 [![Scrutinizer Quality][code-quality-image]][code-quality-url]
 [![Scrutinizer Coverage][code-coverage-image]][code-coverage-url]
@@ -21,56 +19,56 @@ composer require meekframework/route
 
 ## Usage
 
-Using the router as a proxy will probably be the most common usage:
+Using the router with the front controller pattern is probably the common use:
 
 ```php
-<?php
-// bootstrapping...
-error_reporting(-1);
-date_default_timezone_set('Australia/Brisbane');
-
-require_once 'vendor/autoload.php';
-
+use Meek\Route\Collection;
+use Meek\Route\Mapper;
+use Meek\Route\Matcher;
+use Meek\Route\Dispatcher;
+use Zend\Diactoros\Response\TextResponse;
+use Zend\Diactoros\ServerRequestFactory;
+use Zend\Diactoros\Response\SapiEmitter;
+use Meek\Route\TargetNotMatched;
+use Meek\Route\MethodNotMatched;
 use Psr\Http\Message\ServerRequestInterface;
-use Meek\Routing\Rule\MatchMethod;
 
-// setup...
-$request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
-$routeCollection = new Meek\Route\Collection();
-$map = Meek\Route\Mapper($collection);
+// any PSR7 compliant library can be use to generate server requests
+$serverRequest = ServerRequestFactory::fromGlobals();
+$collection = new Collection();
+$map = new Mapper($collection);
+$matcher = new Matcher($collection);
+$dispatcher = new Dispatcher($matcher);
 
-$map->get('home', '/', function (ServerRequestInterface $request) {
-    return new Zend\Diactoros\Response\TextResponse('Hello, world!');
+$map->get('/', function (ServerRequestInterface $request) {
+    // a PSR7 responses must be returned
+    return new TextResponse('Hello, world!');
 });
 
-// using built-in rules.
-$map->delete('/users/:id', function (ServerRequestInterface $request) {
-    return sprintf('Deleting user: "%s"', $request->getAttribute('id'));
-})
-
-// custom rules
-$map->get('/admin', function () {
-    return 'Admin Section...';
-})->addRule(new Custome\Rule\Authenicate());
-
-$map->add(new Meek\Routing\Route(
-    'api.users.retrieve',
-    '/api/:version/users/:id',
-    function (ServerRequestInterface $request) {
-        return sprintf(
-            'retrieving... %s... %s...',
-            $request->getAttribute('version'),
-            $request->getAttribute('id')
-        );
-    }
-));
-
-// catch all route (typehinting parameters).
-$map->map('vanity', '/:username', function ($username) {
-    return sprintf('Hello, %s!', $username);
+$map->get('/posts', function (ServerRequestInterface $request) {
+    return new TextResponse('Viewing all posts!');
 });
 
-$response = $router->dispatch($request);
+$map->get('/posts/:id', function (ServerRequestInterface $request) {
+    return new TextResponse(sprintf('You are viewing post "%s"!', $request->getAttribute('id')));
+});
+
+// etc...
+$map->head('/', function (ServerRequestInterface $request) { ... });
+$map->put('/', function (ServerRequestInterface $request) { ... });
+$map->post('/', function (ServerRequestInterface $request) { ... });
+$map->delete('/', function (ServerRequestInterface $request) { ... });
+$map->options('/', function (ServerRequestInterface $request) { ... });
+
+try {
+    $response = $dispatcher->dispatch($serverRequest);
+} catch (TargetNotMatched $e) {
+    $response = new TextResponse('Not Found', 404);
+} catch (MethodNotMatched $e) {
+    $response = new TextResponse('Method Not Allowed', 405, ['allow' => $e->getAllowedMethods()]);
+}
+
+(new SapiEmitter())->emit($response);
 ```
 
 ## API
@@ -85,15 +83,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 The MIT License (MIT). Please see [LICENSE.md](LICENSE.md) for more information.
 
-[build-url]: https://scrutinizer-ci.com/g/nbish11/meek-routing/build-status/master
-[build-image]: https://scrutinizer-ci.com/g/nbish11/meek-routing/badges/build.png?b=master
-[code-quality-url]: https://scrutinizer-ci.com/g/nbish11/meek-routing/?branch=master
-[code-quality-image]: https://img.shields.io/scrutinizer/g/nbish11/meek-routing.svg
-[code-coverage-url]: https://scrutinizer-ci.com/g/nbish11/meek-routing
-[code-coverage-image]: https://scrutinizer-ci.com/g/nbish11/meek-routing/badges/coverage.png?b=master
-[packagist-url]: https://packagist.org/packages/nbish11/meek-routing
-[packagist-image]: https://img.shields.io/packagist/v/nbish11/meek-routing.svg
-[license-url]: https://github.com/nbish11/meek-routing/blob/master/LICENSE.md
-[license-image]: https://img.shields.io/packagist/l/nbish11/meek-routing.svg
-[composer-lock-url]: https://packagist.org/packages/nbish11/meek-routing
-[composer-lock-image]: https://poser.pugx.org/nbish11/meek-routing/composerlock
+[build-url]: https://scrutinizer-ci.com/g/meekframework/meek-route/build-status/master
+[build-image]: https://scrutinizer-ci.com/g/meekframework/meek-route/badges/build.png?b=master
+[code-quality-url]: https://scrutinizer-ci.com/g/meekframework/meek-route/?branch=master
+[code-quality-image]: https://img.shields.io/scrutinizer/g/meekframework/meek-route.svg
+[code-coverage-url]: https://scrutinizer-ci.com/g/meekframework/meek-route
+[code-coverage-image]: https://scrutinizer-ci.com/g/meekframework/meek-route/badges/coverage.png?b=master
+[packagist-url]: https://packagist.org/packages/meekframework/meek-route
+[packagist-image]: https://img.shields.io/packagist/v/meekframework/meek-route.svg
+[license-url]: https://github.com/meekframework/meek-route/blob/master/LICENSE.md
+[license-image]: https://img.shields.io/packagist/l/meekframework/meek-route.svg
+[composer-lock-url]: https://packagist.org/packages/meekframework/meek-route
+[composer-lock-image]: https://poser.pugx.org/meekframework/meek-route/composerlock
