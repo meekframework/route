@@ -5,7 +5,6 @@
 [![Scrutinizer Coverage][code-coverage-image]][code-coverage-url]
 [![Packagist Latest Stable Version][packagist-image]][packagist-url]
 [![MIT License][license-image]][license-url]
-[![composer.lock Status][composer-lock-image]][composer-lock-url]
 
 A simple framework for routing.
 
@@ -93,5 +92,3 @@ The MIT License (MIT). Please see [LICENSE.md](LICENSE.md) for more information.
 [packagist-image]: https://img.shields.io/packagist/v/meekframework/meek-route.svg
 [license-url]: https://github.com/meekframework/meek-route/blob/master/LICENSE.md
 [license-image]: https://img.shields.io/packagist/l/meekframework/meek-route.svg
-[composer-lock-url]: https://packagist.org/packages/meekframework/meek-route
-[composer-lock-image]: https://poser.pugx.org/meekframework/meek-route/composerlock
