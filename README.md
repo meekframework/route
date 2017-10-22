@@ -1,8 +1,8 @@
 # Meek-Routing Component
 
-[![Scrutinizer Build Status][build-image]][build-url]
-[![Scrutinizer Quality][code-quality-image]][code-quality-url]
-[![Scrutinizer Coverage][code-coverage-image]][code-coverage-url]
+[![Scrutinizer Build Status][scrutinizer-build-image]][scrutinizer-build-url]
+[![Scrutinizer Code Quality][scrutinizer-code-quality-image]][scrutinizer-code-quality-url]
+[![Scrutinizer Code Coverage][scrutinizer-code-coverage-image]][scrutinizer-code-coverage-url]
 [![Packagist Latest Stable Version][packagist-image]][packagist-url]
 [![MIT License][license-image]][license-url]
 
@@ -82,13 +82,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 The MIT License (MIT). Please see [LICENSE.md](LICENSE.md) for more information.
 
-[build-url]: https://scrutinizer-ci.com/g/meekframework/meek-route/build-status/master
-[build-image]: https://scrutinizer-ci.com/g/meekframework/meek-route/badges/build.png?b=master
-[code-quality-url]: https://scrutinizer-ci.com/g/meekframework/meek-route/?branch=master
-[code-quality-image]: https://img.shields.io/scrutinizer/g/meekframework/meek-route.svg
-[code-coverage-url]: https://scrutinizer-ci.com/g/meekframework/meek-route
-[code-coverage-image]: https://scrutinizer-ci.com/g/meekframework/meek-route/badges/coverage.png?b=master
-[packagist-url]: https://packagist.org/packages/meekframework/meek-route
-[packagist-image]: https://img.shields.io/packagist/v/meekframework/meek-route.svg
-[license-url]: https://github.com/meekframework/meek-route/blob/master/LICENSE.md
-[license-image]: https://img.shields.io/packagist/l/meekframework/meek-route.svg
+[scrutinizer-build-url]: https://scrutinizer-ci.com/g/meekframework/route/build-status/master
+[scrutinizer-build-image]: https://scrutinizer-ci.com/g/meekframework/route/badges/build.png?b=master
+[scrutinizer-code-quality-url]: https://scrutinizer-ci.com/g/meekframework/route/?branch=master
+[scrutinizer-code-quality-image]: https://scrutinizer-ci.com/g/meekframework/route/badges/quality-score.png?b=master
+[scrutinizer-code-coverage-url]: https://scrutinizer-ci.com/g/meekframework/route/?branch=master
+[scrutinizer-code-coverage-image]: https://scrutinizer-ci.com/g/meekframework/route/badges/coverage.png?b=master
+[packagist-url]: https://packagist.org/packages/meekframework/route
+[packagist-image]: https://img.shields.io/packagist/v/meekframework/route.svg
+[license-url]: https://raw.githubusercontent.com/meekframework/route/master/LICENSE.md
+[license-image]: https://img.shields.io/badge/license-MIT-blue.svg
