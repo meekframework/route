@@ -1,5 +1,5 @@
 {
-    "name": "nbish11/meek-routing",
+    "name": "meekframework/route",
     "description": "A simple framework for routing URLs in PHP.",
     "require-dev": {
         "zendframework/zend-diactoros": "^1.3",
