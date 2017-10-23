@@ -94,6 +94,27 @@ class MatcherTest extends TestCase
     }
 
     /**
+     * @covers \Meek\Route\Matcher::matchRequestMethod
+     */
+    public function testHeadMethodIsAddedToAllowedMethodsIfNoMatchingHeadRouteButMethodNotMatchExceptionContainsGetMethod()
+    {
+        $routeCollection = new Collection();
+        $request = $this->createServerRequest('post', '/');
+        $methodNotMatched = null;
+        $matcher = new Matcher($routeCollection);
+
+        $routeCollection->add(new Route('get', '/', function () {}));
+
+        try {
+            $matchedRoute = $matcher->match($request);
+        } catch (MethodNotMatched $e) {
+            $methodNotMatched = $e;
+        }
+
+        $this->assertEquals(['GET', 'HEAD'], $methodNotMatched->getAllowedMethods());
+    }
+
+    /**
      * @covers \Meek\Route\Matcher::matchRequestTarget
      * @covers \Meek\Route\Matcher::getPattern
      * @covers \Meek\Route\Matcher::extractPlaceholderValues

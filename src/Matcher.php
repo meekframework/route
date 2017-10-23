@@ -76,6 +76,10 @@ class Matcher
             array_push($allowedMethods, $routeMethod);
         }
 
+        if (in_array('GET', $allowedMethods) && !in_array('HEAD', $allowedMethods)) {
+            array_push($allowedMethods, 'HEAD');
+        }
+
         throw new MethodNotMatched($requestMethod, $allowedMethods);
     }
 
